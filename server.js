@@ -6,7 +6,7 @@ import { connectDB } from './config/db.js';
 import Product from './models/product.js';
 import UserName from './models/Register.js';
 import cors from 'cors';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import multer from 'multer';
