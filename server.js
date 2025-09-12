@@ -24,7 +24,7 @@ const port = process.env.PORT || 5000; // project PORT
 
 //--- use cors ---//
 app.use(cors({
-  origin: 'https://vite-frontend-liart.vercel.app',
+  origin: 'https://vite-frontend-liart.vercel.app/',
   credentials: true
 }));
 
