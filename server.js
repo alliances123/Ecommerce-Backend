@@ -23,12 +23,16 @@ app.use(cookieParser());
 const port = process.env.PORT || 5000; // project PORT
 
 //--- use cors ---//
+// app.use(cors({
+//   origin: [
+//     'http://localhost:5173',
+//     'https://vite-frontend-liart.vercel.app',
+//     'https://vite-frontend-git-main-abdelrahman-mohameds-projects-ccc05873.vercel.app',
+//     'https://vite-frontend-cwpwl0gyv-abdelrahman-mohameds-projects-ccc05873.vercel.app'],
+//   credentials: true
+// }));
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://vite-frontend-liart.vercel.app',
-    'https://vite-frontend-git-main-abdelrahman-mohameds-projects-ccc05873.vercel.app',
-    'https://vite-frontend-cwpwl0gyv-abdelrahman-mohameds-projects-ccc05873.vercel.app'],
+  origin: (origin, callback) => callback(null, true),
   credentials: true
 }));
 
