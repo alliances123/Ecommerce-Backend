@@ -24,7 +24,7 @@ const port = process.env.PORT || 5000; // project PORT
 
 //--- use cors ---//
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://vite-frontend-git-main-abdelrahman-mohameds-projects-ccc05873.vercel.app'],
+  origin: ['https://vite-frontend-git-main-abdelrahman-mohameds-projects-ccc05873.vercel.app'],
   credentials: true
 }));
 
