@@ -469,30 +469,35 @@ app.get("/getSavedProducts", async (req, res) => {
 });
 
 // remove saved product
+// remove saved product
 app.delete("/removeSavedProduct/:productId", async (req, res) => {
   try {
     const token = req.cookies.token;
-    if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
+    if (!token) {
+      return res.status(401).json({ success: false, message: "Not authenticated" });
+    }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { productId } = req.params;   // ✅ هنا من params
+    const { productId } = req.params;
+
     console.log("Deleting product with ID:", productId);
 
-    const user = await UserName.findById(decoded.id);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    const updatedUser = await UserName.findByIdAndUpdate(
+      decoded.id,
+      { $pull: { savedProducts: productId } },
+      { new: true }
+    ).populate("savedProducts");
 
-    user.savedProducts = user.savedProducts.filter(id => id.toString() !== productId);
-    await user.save();
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-    const populatedUser = await user.populate("savedProducts");
-    res.status(200).json({ success: true, savedProducts: populatedUser.savedProducts });
+    res.status(200).json({ success: true, savedProducts: updatedUser.savedProducts });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
-
 
 
 //--- Start server ---//
