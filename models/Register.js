@@ -7,7 +7,8 @@ const registerSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   PhoneNumber: {
     type: String,
@@ -23,7 +24,8 @@ const registerSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-  },
+  }
+  ,
   banner: {
     type: String,
   },

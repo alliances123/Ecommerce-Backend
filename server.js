@@ -22,10 +22,10 @@ app.use(express.json());
 app.use(cookieParser());
 const port = process.env.PORT || 5000; // project PORT
 
-//--- use cors ---//
+//--- use cors for domains security ---//
 app.use(cors({
   origin: [
-    'http://localhost:5173',
+    'http://localhost:5173', // local host
     'https://vite-frontend-liart.vercel.app',
     'https://vite-frontend-git-main-abdelrahman-mohameds-projects-ccc05873.vercel.app',
     'https://vite-frontend-cwpwl0gyv-abdelrahman-mohameds-projects-ccc05873.vercel.app'],
@@ -61,17 +61,21 @@ app.get('/', (req, res) => {
 
 app.post('/products', async (req, res) => {
   const product = req.body;
+
   if (!product.name || !product.price || !product.image || product.image.length === 0) {
     return res.status(400).json({ success: false, message: 'Please enter all fields' });
   }
+
   try {
     const newProduct = new Product(product);
     await newProduct.save();
     res.status(201).json({ success: true, data: newProduct });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to save product' });
+    console.error("Error creating product:", error);
+    res.status(500).json({ success: false, message: 'Failed to save product', error: error.message });
   }
 });
+
 
 //--- fetch products ---//
 app.get('/api/products', async (req, res) => {
@@ -439,7 +443,9 @@ app.post("/saveProduct", async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     if (!user.savedProducts.includes(productId)) {
+      console.log("Before Add:", user.savedProducts);
       user.savedProducts.push(productId);
+      console.log("After Add:", user.savedProducts);
       await user.save();
     }
 
@@ -460,7 +466,7 @@ app.get("/getSavedProducts", async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await UserName.findById(decoded.id).populate("savedProducts");
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
+    console.log("Before filter:", user.savedProducts);
     res.status(200).json({ success: true, savedProducts: user.savedProducts });
   } catch (err) {
     console.error(err);
@@ -468,8 +474,6 @@ app.get("/getSavedProducts", async (req, res) => {
   }
 });
 
-// remove saved product
-// remove saved product
 app.delete("/removeSavedProduct/:productId", async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -487,12 +491,11 @@ app.delete("/removeSavedProduct/:productId", async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    console.log("📦 Current savedProducts:", user.savedProducts);
-
-    // الحذف
+    console.log("Before filter:", user.savedProducts);
     user.savedProducts = user.savedProducts.filter(
       (id) => id.toString() !== productId.toString()
     );
+    console.log("After filter:", user.savedProducts);
 
     await user.save();
 

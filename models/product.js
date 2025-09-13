@@ -17,13 +17,12 @@ const productSchema = new mongoose.Schema({
     required: true,
     default: 'EGY'
   },
-  image: {
-    type: String,
-    required: true
-  },
-  secImage: {
-    type: String,
-  },
+  image: [
+    {
+      type: String,
+      required: true
+    }
+  ],
   dis: {
     type: String,
   },
