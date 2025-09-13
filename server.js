@@ -455,8 +455,11 @@ app.delete("/clearCart/:userId", async (req, res) => {
 app.post('/saveProduct', async (req, res) => {
   const { userId, productId } = req.body;
 
-  if (!userId || !productId) {
-    return res.status(400).json({ success: false, message: 'Missing userId or productId' });
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'Missing userId' });
+  }
+  if (!productId) {
+    return res.status(400).json({ success: false, message: 'Missing productId' });
   }
 
   try {
