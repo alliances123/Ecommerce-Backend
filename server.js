@@ -1,4 +1,4 @@
-
+import mongoose from 'mongoose';
 //--- libraries imports ---//
 import express from 'express';
 import dotenv from 'dotenv';
@@ -471,7 +471,6 @@ app.get("/getSavedProducts", async (req, res) => {
 // remove saved product
 // remove saved product
 
-
 app.delete("/removeSavedProduct/:productId", async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -484,14 +483,13 @@ app.delete("/removeSavedProduct/:productId", async (req, res) => {
 
     console.log("🔎 Trying to delete product with ID:", productId);
 
-    // ✅ تحقق إن الـ productId صحيح ObjectId
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ success: false, message: "Invalid productId" });
-    }
-
     const updatedUser = await UserName.findByIdAndUpdate(
       decoded.id,
-      { $pull: { savedProducts: new mongoose.Types.ObjectId(productId) } },
+      {
+        $pull: {
+          savedProducts: { $in: [productId, new mongoose.Types.ObjectId(productId)] }
+        }
+      },
       { new: true }
     ).populate("savedProducts");
 
@@ -503,10 +501,11 @@ app.delete("/removeSavedProduct/:productId", async (req, res) => {
 
     res.status(200).json({ success: true, savedProducts: updatedUser.savedProducts });
   } catch (err) {
-    console.error("❌ Error in removeSavedProduct:", err.message);
+    console.error("❌ Error in removeSavedProduct:", err);
     res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
 });
+
 
 //--- Start server ---//
 connectDB().then(() => {
