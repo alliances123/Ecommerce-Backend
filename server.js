@@ -451,68 +451,65 @@ app.delete("/clearCart/:userId", async (req, res) => {
 //     res.status(500).json({ success: false, message: "Server error" });
 //   }
 // });
-
-app.post('/saveProduct', async (req, res) => {
-  const { userId, productId } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({ success: false, message: 'Missing userId' });
-  }
-  if (!productId) {
-    return res.status(400).json({ success: false, message: 'Missing productId' });
-  }
-
+// save a product
+app.post("/saveProduct", async (req, res) => {
   try {
-    const user = await UserName.findById(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { productId } = req.body;
+
+    const user = await UserName.findById(decoded.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    if (!user.savedProducts.includes(productId)) {
+      user.savedProducts.push(productId);
+      await user.save();
     }
-    const existingItem = user.savedProducts.find(item => item.productId.toString() === productId);
 
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      user.savedProducts.push({ productId });
-    }
-
-    await user.save();
-    res.status(200).json({ success: true, message: 'Product saved', savedProducts: user.savedProducts }); // success
-
+    const populatedUser = await user.populate("savedProducts");
+    res.status(200).json({ success: true, savedProducts: populatedUser.savedProducts });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' }); // error
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-app.get('/getSavedProducts/:userId', async (req, res) => {
+// get saved products
+app.get("/getSavedProducts", async (req, res) => {
   try {
-    const user = await UserName.findById(req.params.userId).populate('savedProducts.productId');
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await UserName.findById(decoded.id).populate("savedProducts");
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     res.status(200).json({ success: true, savedProducts: user.savedProducts });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-//--- delete cart ---//
+// remove saved product
 app.delete("/removeSavedProduct", async (req, res) => {
-  const { userId, productId } = req.body;
-
   try {
-    const user = await UserName.findById(userId);
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { productId } = req.body;
+
+    const user = await UserName.findById(decoded.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    user.savedProducts = user.savedProducts.filter(
-      (item) => item.productId.toString() !== productId // filter carts
-    );
+    user.savedProducts = user.savedProducts.filter(id => id.toString() !== productId);
+    await user.save();
 
-    await user.save(); // event loop
-    res.json({ success: true, message: "Product removed from saved", savedProducts: user.savedProducts });
+    const populatedUser = await user.populate("savedProducts");
+    res.status(200).json({ success: true, savedProducts: populatedUser.savedProducts });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
