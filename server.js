@@ -162,7 +162,7 @@ app.post('/login', async (req, res) => {
 //--- logout logic ---//
 app.post('/logout', async (req, res) => {
   try {
-    res.cookie('token', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', expires: new Date(0) });
+    res.cookie('token', '', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'none', expires: new Date(0) });
     res.status(200).json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
     console.error(error);
@@ -427,31 +427,6 @@ app.delete("/clearCart/:userId", async (req, res) => {
   }
 });
 
-//--- save a product ---//
-// app.post("/saveProduct", async (req, res) => {
-//   try {
-//     const token = req.cookies.token;
-//     if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const { productId } = req.body;
-
-//     const user = await UserName.findById(decoded.id);
-//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-//     if (!user.savedProducts.includes(productId)) {
-//       user.savedProducts.push(productId);
-//       await user.save();
-//     }
-
-//     const populatedUser = await user.populate("savedProducts");
-//     res.status(200).json({ success: true, savedProducts: populatedUser.savedProducts });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-// save a product
 app.post("/saveProduct", async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -494,13 +469,14 @@ app.get("/getSavedProducts", async (req, res) => {
 });
 
 // remove saved product
-app.delete("/removeSavedProduct", async (req, res) => {
+app.delete("/removeSavedProduct/:productId", async (req, res) => {
   try {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { productId } = req.body;
+    const { productId } = req.params;   // ✅ هنا من params
+    console.log("Deleting product with ID:", productId);
 
     const user = await UserName.findById(decoded.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -516,48 +492,8 @@ app.delete("/removeSavedProduct", async (req, res) => {
   }
 });
 
-// //--- get saved products ---//
-// app.get("/getSavedProducts", async (req, res) => {
-//   try {
-//     const token = req.cookies.token;
-//     if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const user = await UserName.findById(decoded.id).populate("savedProducts");
-//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-//     res.status(200).json({ success: true, savedProducts: user.savedProducts });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
 
 
-// //--- delete saved product ---//
-// app.delete("/removeSavedProduct", async (req, res) => {
-//   try {
-//     const token = req.cookies.token;
-//     if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const { productId } = req.body;
-
-//     const user = await UserName.findById(decoded.id);
-//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-//     user.savedProducts = user.savedProducts.filter(id => id.toString() !== productId);
-//     await user.save();
-
-//     const populatedUser = await user.populate("savedProducts");
-//     res.status(200).json({ success: true, savedProducts: populatedUser.savedProducts });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-//--- ---//
 
 //--- Start server ---//
 connectDB().then(() => {

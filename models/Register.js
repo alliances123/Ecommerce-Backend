@@ -34,10 +34,7 @@ const registerSchema = new mongoose.Schema({
     }
   ],
   savedProducts: [
-    {
-      productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-      quantity: { type: Number, default: 1 }
-    }
+    { type: mongoose.Schema.Types.ObjectId, ref: "Product" }
   ]
 }, {
   timestamps: true // createdAt, updatedAt
