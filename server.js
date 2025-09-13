@@ -401,7 +401,7 @@ app.put("/updateCart", async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not in cart" });
     }
 
-    productInCart.quantity = quantity; // نغير الكمية لأي رقم نبعته
+    productInCart.quantity = quantity;
 
     await user.save();
     res.json({ success: true, message: "Cart updated", cart: user.cart });
@@ -417,7 +417,7 @@ app.delete("/clearCart/:userId", async (req, res) => {
     const user = await UserName.findById(req.params.userId);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    user.cart = []; // نفرغ الكارت
+    user.cart = [];
     await user.save();
 
     res.json({ success: true, message: "Cart cleared successfully", cart: user.cart });
@@ -469,14 +469,14 @@ app.post('/saveProduct', async (req, res) => {
     }
     const existingItem = user.savedProducts.find(item => item.productId.toString() === productId);
 
-    if (existingItem) { // check the cart is already exist or not
+    if (existingItem) {
       existingItem.quantity += 1;
     } else {
       user.savedProducts.push({ productId });
     }
 
     await user.save();
-    res.status(200).json({ success: true, message: 'Product added to cart', cart: user.cart }); // success
+    res.status(200).json({ success: true, message: 'Product saved', savedProducts: user.savedProducts }); // success
 
   } catch (err) {
     console.error(err);
@@ -486,13 +486,13 @@ app.post('/saveProduct', async (req, res) => {
 
 app.get('/getSavedProducts/:userId', async (req, res) => {
   try {
-    const user = await UserName.findById(req.params.userId).populate('cart.productId');
+    const user = await UserName.findById(req.params.userId).populate('savedProducts.productId');
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.status(200).json({ success: true, cart: user.savedProducts });
+    res.status(200).json({ success: true, savedProducts: user.savedProducts });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -512,7 +512,7 @@ app.delete("/removeSavedProduct", async (req, res) => {
     );
 
     await user.save(); // event loop
-    res.json({ success: true, message: "Product removed from cart", cart: user.savedProducts });
+    res.json({ success: true, message: "Product removed from saved", savedProducts: user.savedProducts });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
