@@ -470,6 +470,7 @@ app.get("/getSavedProducts", async (req, res) => {
 
 // remove saved product
 // remove saved product
+
 app.delete("/removeSavedProduct/:productId", async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -484,7 +485,7 @@ app.delete("/removeSavedProduct/:productId", async (req, res) => {
 
     const updatedUser = await UserName.findByIdAndUpdate(
       decoded.id,
-      { $pull: { savedProducts: productId } },
+      { $pull: { savedProducts: new mongoose.Types.ObjectId(productId) } },
       { new: true }
     ).populate("savedProducts");
 
