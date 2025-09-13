@@ -471,6 +471,7 @@ app.get("/getSavedProducts", async (req, res) => {
 // remove saved product
 // remove saved product
 
+
 app.delete("/removeSavedProduct/:productId", async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -481,7 +482,12 @@ app.delete("/removeSavedProduct/:productId", async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const { productId } = req.params;
 
-    console.log("Deleting product with ID:", productId);
+    console.log("🔎 Trying to delete product with ID:", productId);
+
+    // ✅ تحقق إن الـ productId صحيح ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ success: false, message: "Invalid productId" });
+    }
 
     const updatedUser = await UserName.findByIdAndUpdate(
       decoded.id,
@@ -493,13 +499,14 @@ app.delete("/removeSavedProduct/:productId", async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    console.log("✅ After delete savedProducts:", updatedUser.savedProducts);
+
     res.status(200).json({ success: true, savedProducts: updatedUser.savedProducts });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("❌ Error in removeSavedProduct:", err.message);
+    res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
 });
-
 
 //--- Start server ---//
 connectDB().then(() => {
