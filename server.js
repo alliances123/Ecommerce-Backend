@@ -470,7 +470,6 @@ app.get("/getSavedProducts", async (req, res) => {
 
 // remove saved product
 // remove saved product
-
 app.delete("/removeSavedProduct/:productId", async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -481,25 +480,26 @@ app.delete("/removeSavedProduct/:productId", async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const { productId } = req.params;
 
-    console.log("🔎 Trying to delete product with ID:", productId);
+    console.log("🟢 Requested productId:", productId);
 
-    const updatedUser = await UserName.findByIdAndUpdate(
-      decoded.id,
-      {
-        $pull: {
-          savedProducts: { $in: [productId, new mongoose.Types.ObjectId(productId)] }
-        }
-      },
-      { new: true }
-    ).populate("savedProducts");
-
-    if (!updatedUser) {
+    const user = await UserName.findById(decoded.id);
+    if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    console.log("✅ After delete savedProducts:", updatedUser.savedProducts);
+    console.log("📦 Current savedProducts:", user.savedProducts);
 
-    res.status(200).json({ success: true, savedProducts: updatedUser.savedProducts });
+    // الحذف
+    user.savedProducts = user.savedProducts.filter(
+      (id) => id.toString() !== productId.toString()
+    );
+
+    await user.save();
+
+    const populatedUser = await user.populate("savedProducts");
+    console.log("✅ After delete savedProducts:", populatedUser.savedProducts);
+
+    res.status(200).json({ success: true, savedProducts: populatedUser.savedProducts });
   } catch (err) {
     console.error("❌ Error in removeSavedProduct:", err);
     res.status(500).json({ success: false, message: "Server error", error: err.message });
