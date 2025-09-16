@@ -76,7 +76,6 @@ app.post('/products', async (req, res) => {
   }
 });
 
-
 //--- fetch products ---//
 app.get('/api/products', async (req, res) => {
   try {
@@ -127,7 +126,9 @@ app.post('/register', async (req, res) => {
   try {
     const newRegister = new UserName(userRegister);
     await newRegister.save();
-    res.status(201).json({ success: true, data: newRegister });
+    const { password, ...safeUser } = newRegister._doc;
+    res.status(201).json({ success: true, data: safeUser });
+
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error : cant save this register' });
   }
