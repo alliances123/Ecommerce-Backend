@@ -28,7 +28,8 @@ app.use(cors({
     'http://localhost:5173', // local host
     'https://vite-frontend-liart.vercel.app',
     'https://vite-frontend-git-main-abdelrahman-mohameds-projects-ccc05873.vercel.app',
-    'https://vite-frontend-cwpwl0gyv-abdelrahman-mohameds-projects-ccc05873.vercel.app'],
+    'https://vite-frontend-cwpwl0gyv-abdelrahman-mohameds-projects-ccc05873.vercel.app',
+    'vite-frontend-irbtr8qrd-abdelrahman-mohameds-projects-ccc05873.vercel.app'],
   credentials: true
 }));
 
