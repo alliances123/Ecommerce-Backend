@@ -266,23 +266,12 @@ app.delete('/delete_account', async (req, res) => {
 
 //--- Upload image ---//
 app.post('/uploadImage', upload.single('image'), async (req, res) => {
-
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-  const token = req.cookies.token
-  if (!token) return res.status(401).json({ success: false, message: 'no account to delete' }) // check the use token
-
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET) // get user token const
-  } catch (err) {
-    return res.status(401).json({ success: false, message: 'invalid token' })
-  }
-  const user = await UserName.findById(decoded.id); // user
-  if (!user) return res.status(404).json({ success: false, message: 'User not found' })
+  const { userId } = req.body;
 
   try {
-    const userImage = await UserName.findByIdAndUpdate(user, { image: req.file.filename }, { new: true });
-    res.status(200).json({ success: true, message: 'Image uploaded', userImage });
+    const user = await UserName.findByIdAndUpdate(userId, { image: req.file.filename }, { new: true });
+    res.status(200).json({ success: true, message: 'Image uploaded', user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Cannot upload image' });
@@ -292,18 +281,7 @@ app.post('/uploadImage', upload.single('image'), async (req, res) => {
 //--- get user image logic ---//
 app.get('/user/image/:id', async (req, res) => {
   try {
-    const token = req.cookies.token
-    if (!token) return res.status(401).json({ success: false, message: 'no account to delete' }) // check the use token
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET)
-    } catch (err) {
-      return res.status(401).json({ success: false, message: 'invalid token' })
-    }
-    const user = await UserName.findById(decoded.id); // user
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' })
-
+    const user = await UserName.findById(req.params.id);
     if (!user || !user.image) return res.status(404).send('No image found');
 
     res.sendFile(path.resolve('uploads', user.image));
@@ -314,25 +292,12 @@ app.get('/user/image/:id', async (req, res) => {
 
 //--- post user banner logic ---//
 app.post('/uploadBanner', upload.single('image'), async (req, res) => {
-  const token = req.cookies.token
-  if (!token) return res.status(401).json({ success: false, message: 'no account to delete' }) // check the use token
-
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET)
-  } catch (err) {
-    return res.status(401).json({ success: false, message: 'invalid token' })
-  }
-  const user = await UserName.findById(decoded.id); // user
-  if (!user) return res.status(404).json({ success: false, message: 'User not found' })
-
-  if (!user || !user.image) return res.status(404).send('No image found');
-
+  const { userId } = req.body;
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
 
   try {
-    const userImage = await UserName.findByIdAndUpdate(user, { banner: req.file.filename }, { new: true });
-    res.status(200).json({ success: true, message: 'banner uploaded', userImage });
+    const user = await UserName.findByIdAndUpdate(userId, { banner: req.file.filename }, { new: true });
+    res.status(200).json({ success: true, message: 'banner uploaded', user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Cannot upload banner' });
@@ -341,21 +306,12 @@ app.post('/uploadBanner', upload.single('image'), async (req, res) => {
 
 //--- get user banner logic ---//
 app.get('/user/banner/:id', async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
   try {
-    const token = req.cookies.token
-    if (!token) return res.status(401).json({ success: false, message: 'no account to delete' }) // check the use token
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET)
-    } catch (err) {
-      return res.status(401).json({ success: false, message: 'invalid token' })
-    }
-    const user = await UserName.findById(decoded.id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' })
-
-    if (!user || !user.image) return res.status(404).send('No image found');
-
+    const user = await UserName.findById(req.params.id);
     if (!user || !user.banner) return res.status(404).send('No banner found');
 
     res.sendFile(path.resolve('uploads', user.banner));
