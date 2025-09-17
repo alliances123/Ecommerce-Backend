@@ -45,6 +45,11 @@ const productSchema = new mongoose.Schema({
       text: { type: String }
     }
   ],
+  size: [
+    {
+      name: { type: String },
+    }
+  ],
   inStock: {
     type: Boolean,
     required: true,
