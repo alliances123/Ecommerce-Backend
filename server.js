@@ -340,7 +340,7 @@ app.post('/addCart', async (req, res) => {
     }
     const existingItem = user.cart.find(item => item.productId.toString() === productId); // exist cart const
 
-    if (existingItem) { // check the cart is already exist or not
+    if (existingItem) {
       existingItem.quantity += 1;
     } else {
       user.cart.push({ productId });
